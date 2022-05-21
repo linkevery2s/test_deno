@@ -15,11 +15,15 @@ jobs:
         with:
           deno-version: v1.x
       - name: fetch
-        run: cd deno; deno run -A download.js
-      - name: commit and push
+        run: deno run -A download.js
+        working-directory: ${{ github.workspace }}/deno
+      - name: git setting
         run: |
-          git config --global user.email "workflow@example.com"
-          git config --global user.name "workflow user"
-          git add .
-          git commit -m 'update data' && git push ${REPO} HEAD:${{github.event.pull_request.head.ref}} || true
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      - name: Commit files
+        run: |
+          git add -A
+          if ! git diff-index --quiet HEAD --; then git commit -a -m "Update json (By GitHub Actions)"; fi;
           git push
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
